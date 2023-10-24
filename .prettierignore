@@ -1,0 +1,30 @@
+# .eslintrc
+# .prettierrc
+# .stylelintrc
+.editorconfig
+/dist
+/build
+/out
+/lib
+.git
+.gitignore
+.node_modules
+pnpm-lock.yaml
+.log
+.tmp
+.temp
+logs
+*.png
+*.jpg
+*.gif
+*.ico
+*.pdf
+*.woff
+*.woff2
+/tests
+/__tests__
+/test
+/tests-*
+.env.*
+*.md
+*~

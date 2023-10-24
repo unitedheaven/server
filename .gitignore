@@ -1,0 +1,11 @@
+*-debug.log*
+*-error.log*
+/dist
+/pnpm-lock.yaml
+/tmp
+node_modules
+.DS_Store
+.env*
+!.env.example
+!.env.project
+!.env.vault
