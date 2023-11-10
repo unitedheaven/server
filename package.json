@@ -9,16 +9,20 @@
     "prisma:push": "prisma db push --accept-data-loss",
     "prisma:migrate": "prisma migrate dev --name",
     "prisma:generate": "prisma generate",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "prepare": "husky install"
   },
   "license": "ISC",
   "devDependencies": {
+    "@commitlint/cli": "^18.4.0",
+    "@commitlint/config-conventional": "^18.4.0",
     "@types/node": "^20.8.8",
     "@types/pg": "^8.10.9",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
     "eslint": "^8.52.0",
     "eslint-config-prettier": "^9.0.0",
+    "husky": "^8.0.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.0.3",
     "ts-node": "^10.9.1",
