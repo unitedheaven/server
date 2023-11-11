@@ -9,3 +9,6 @@ node_modules
 !.env.example
 !.env.project
 !.env.vault
+template.yml
+.aws-sam
+samconfig.toml

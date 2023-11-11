@@ -5,19 +5,16 @@
   "main": "server.ts",
   "scripts": {
     "dev": "nodemon src/server.ts",
+    "start": "npm run build:ts && node dist/app.js",
+    "build:ts": "tsc",
     "lint-src": "eslint --ignore-path .eslintignore --ext .ts src",
-    "prisma:push": "prisma db push --accept-data-loss",
-    "prisma:migrate": "prisma migrate dev --name",
-    "prisma:generate": "prisma generate",
-    "prisma:studio": "prisma studio",
-    "prepare": "husky install"
+    "postinstall": "tsc"
   },
   "license": "ISC",
   "devDependencies": {
     "@commitlint/cli": "^18.4.0",
     "@commitlint/config-conventional": "^18.4.0",
     "@types/node": "^20.8.8",
-    "@types/pg": "^8.10.9",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
     "eslint": "^8.52.0",
@@ -30,11 +27,11 @@
   },
   "dependencies": {
     "@fastify/aws-lambda": "^3.4.2",
-    "@fastify/postgres": "^5.2.2",
+    "@fastify/multipart": "^8.0.0",
     "dotenv": "^16.3.1",
     "fastify": "^4.24.3",
     "fastify-type-provider-zod": "^1.1.9",
-    "pg": "^8.11.3",
+    "mongoose": "^8.0.0",
     "zod": "^3.22.4",
     "zod-validation-error": "^2.1.0"
   }

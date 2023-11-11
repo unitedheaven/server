@@ -7,12 +7,14 @@ import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 
 import { FastifyZodInstance } from '../types/fastify-zod'
-import Pg from 'pg'
+import fsMultipart from '@fastify/multipart'
 
 export default async (server: FastifyZodInstance) => {
   server.setValidatorCompiler(validatorCompiler)
   server.setSerializerCompiler(serializerCompiler)
   server.withTypeProvider<ZodTypeProvider>()
+
+  server.register(userMultiPartRoutes)
 
   server.setErrorHandler(async (error, _request, reply) => {
     if (error instanceof z.ZodError) {
@@ -35,13 +37,40 @@ export default async (server: FastifyZodInstance) => {
       },
     },
     async (_request, _reply) => {
-      const client: Pg.PoolClient = await server.pg.connect()
+      return null
+    },
+  )
+}
 
-      // const { id: userId } = request.params
+export const userMultiPartRoutes = async (server: FastifyZodInstance) => {
+  server.register(fsMultipart, {
+    attachFieldsToBody: 'keyValues',
+    isPartAFile: (_fieldName, contentType, _fileName) => {
+      return contentType != undefined && contentType.includes('image')
+    },
+  })
 
-      const userResult = await client.query('SELECT * FROM user')
+  server.post(
+    '/',
+    {
+      schema: {
+        consumes: ['multipart/form-data'],
 
-      return userResult
+        body: z.object({
+          username: z.string(),
+        }),
+
+        response: {
+          200: z.object({
+            username: z.string(),
+          }),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { username } = request.body
+
+      return reply.status(200).send({ username })
     },
   )
 }

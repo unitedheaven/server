@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import Fastify from 'fastify'
-import fastifyPostgres from '@fastify/postgres'
 
 import users from './api/users'
 import healthCheck from './api/health-check'
@@ -11,10 +10,6 @@ const server = Fastify()
 
 server.register(users, { prefix: '/users' })
 server.register(healthCheck, { prefix: '/health-check' })
-
-server.register(fastifyPostgres, {
-  connectionString: process.env.DATABASE_URL,
-})
 
 if (require.main === module) {
   server.listen({ port: constants.PORT, host: '0.0.0.0' }, err => {
