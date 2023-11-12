@@ -1,21 +1,13 @@
-import {
-  serializerCompiler,
-  validatorCompiler,
-  ZodTypeProvider,
-} from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import { fromZodError } from 'zod-validation-error'
-
-import { FastifyZodInstance } from '../types/fastify-zod'
 import fsMultipart from '@fastify/multipart'
 
-export default async (server: FastifyZodInstance) => {
-  server.setValidatorCompiler(validatorCompiler)
-  server.setSerializerCompiler(serializerCompiler)
-  server.withTypeProvider<ZodTypeProvider>()
+import { FastifyZodInstance } from '@/types/fastify-zod'
 
+export default async (server: FastifyZodInstance) => {
   server.register(userMultiPartRoutes)
 
+  // TODO: handle errors in a better way
   server.setErrorHandler(async (error, _request, reply) => {
     if (error instanceof z.ZodError) {
       console.log(fromZodError(error).message)
@@ -37,12 +29,15 @@ export default async (server: FastifyZodInstance) => {
       },
     },
     async (_request, _reply) => {
-      return null
+      const { id } = _request.params
+
+      return { id }
     },
   )
 }
 
-export const userMultiPartRoutes = async (server: FastifyZodInstance) => {
+// TODO: move this to a separate file
+const userMultiPartRoutes = async (server: FastifyZodInstance) => {
   server.register(fsMultipart, {
     attachFieldsToBody: 'keyValues',
     isPartAFile: (_fieldName, contentType, _fileName) => {

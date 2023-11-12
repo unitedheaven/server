@@ -1,16 +1,15 @@
 import 'dotenv/config'
 import Fastify from 'fastify'
 
-import users from './api/users'
-import healthCheck from './api/health-check'
+import * as constants from '@utils/constants'
 
-import * as constants from './utils/constants'
+import routes from '@/routes'
 
 const server = Fastify()
 
-server.register(users, { prefix: '/users' })
-server.register(healthCheck, { prefix: '/health-check' })
+server.register(routes)
 
+// if node runs locally, listen on localhost:PORT else export server for lambda
 if (require.main === module) {
   server.listen({ port: constants.PORT, host: '0.0.0.0' }, err => {
     if (err) {

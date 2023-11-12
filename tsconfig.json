@@ -27,7 +27,12 @@
     "typeRoots": ["node_modules/@types", "src/@types"],
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["src/*"]
+      "@plugins/*": ["./plugins/*"],
+      "@routes/*": ["./routes/*"],
+      "@db/*": ["./db/*"],
+      "@types/*": ["./types/*"],
+      "@utils/*": ["./utils/*"],
+      "@/*": ["./*"]
     }
   },
   "include": ["src/**/*"],
