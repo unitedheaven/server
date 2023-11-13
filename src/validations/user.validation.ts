@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const zodUserResponse = z.object({
-  userId: z.string(),
+  id: z.string(),
   username: z.string(),
 })
 

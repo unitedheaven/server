@@ -13,7 +13,6 @@ import { FastifyZodInstance } from '@/types/fastify-zod'
 export default async (server: FastifyZodInstance) => {
   server.register(userMultiPartRoutes)
 
-  // ROUTE: to get a specific user
   server.get(
     '/:id',
     {
@@ -32,14 +31,7 @@ export default async (server: FastifyZodInstance) => {
       if (!returnedUser)
         return reply.status(404).send({ error: 'User not found' })
 
-      const { _id, username, createdAt, updatedAt } = returnedUser
-
-      return {
-        userId: _id.toString(),
-        username,
-        createdAt,
-        updatedAt,
-      }
+      return returnedUser
     },
   )
 }
@@ -53,7 +45,6 @@ const userMultiPartRoutes = async (server: FastifyZodInstance) => {
     },
   })
 
-  // ROUTE: to create a new user
   server.post(
     '/',
     {
@@ -66,11 +57,9 @@ const userMultiPartRoutes = async (server: FastifyZodInstance) => {
       },
     },
     async (request, reply) => {
-      const returnedUser = await new User(request.body).save()
+      const postedUser = await new User(request.body).save()
 
-      const { _id, username } = returnedUser
-
-      return reply.status(200).send({ userId: _id.toString(), username })
+      return reply.status(200).send(postedUser)
     },
   )
 }

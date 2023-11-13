@@ -1,29 +1,11 @@
-import { model, Schema, ObjectId } from 'mongoose'
+import { model, Schema } from 'mongoose'
+import { v4 as uuidv4 } from 'uuid'
 
-// export interface IAction {
-//   title: string
-//   description: string
-//   image: string
-//   location: {
-//     lat: number
-//     lng: number
-//   }
-//   sdgs: [{ type: Schema.Types.ObjectId; ref: 'SDG' }]
-//   startDate?: Date
-//   endDate: Date
-//   creator: { type: Schema.Types.ObjectId; ref: 'User' }
-//   participants: [{ type: Schema.Types.ObjectId; ref: 'User' }]
-//   followers: [{ type: Schema.Types.ObjectId; ref: 'User' }]
-//   donations: [
-//     { amount: number; donator: { type: Schema.Types.ObjectId; ref: 'User' } },
-//   ]
-//   progress: [{ image?: string; description: string }]
-//   comments: [
-//     { commetor: { type: Schema.Types.ObjectId; ref: 'User' }; comment: string },
-//   ]
-// }
+import { IUser } from '@db/models/user.model'
 
 interface IAction {
+  _id: string
+  id: string
   title: string
   description: string
   image?: string
@@ -31,15 +13,15 @@ interface IAction {
     lat: string
     lng: string
   }
-  SDGs: ObjectId[]
+  SDGs: string[]
   startDate?: Date
   endDate: Date
-  creator: ObjectId
-  participants: ObjectId[]
-  followers: ObjectId[]
+  creator: IUser
+  participants: IUser[]
+  followers: IUser[]
   donations: {
     amount: number
-    donator: ObjectId
+    donator: IUser
   }[]
   progress: {
     image?: string
@@ -47,7 +29,7 @@ interface IAction {
   }[]
   comments: {
     comment: string
-    commentor: ObjectId
+    commentor: IUser
   }[]
   createdAt?: Date
   updatedAt?: Date
@@ -55,27 +37,32 @@ interface IAction {
 
 const actionSchema = new Schema<IAction>(
   {
+    _id: {
+      type: String,
+      required: true,
+      default: uuidv4,
+    },
     title: { type: String, required: true },
     description: { type: String, required: true },
     image: { type: String },
     location: {
-      lat: { type: String, required: true },
-      lng: { type: String, required: true },
+      lat: { type: String },
+      lng: { type: String },
     },
-    SDGs: [{ type: Schema.Types.ObjectId, ref: 'SDG', required: true }],
+    SDGs: [{ type: String, ref: 'SDG', required: true }],
     startDate: { type: Date },
     endDate: { type: Date, required: true },
     creator: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'User',
       required: true,
     },
-    participants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    participants: [{ type: String, ref: 'User' }],
+    followers: [{ type: String, ref: 'User' }],
     donations: [
       {
         amount: { type: Number, required: true },
-        donator: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        donator: { type: String, ref: 'User', required: true },
       },
     ],
     progress: [
@@ -87,11 +74,40 @@ const actionSchema = new Schema<IAction>(
     comments: [
       {
         comment: { type: String, required: true },
-        commentor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        commentor: { type: String, ref: 'User', required: true },
       },
     ],
   },
   { timestamps: true },
 )
+
+// Virtual for _id
+actionSchema.virtual('id').get(function () {
+  return this._id
+})
+
+// JSON serializatoin logic
+actionSchema.set('toJSON', {
+  virtuals: true,
+  transform: (_doc, ret) => {
+    delete ret._id
+    delete ret.__v
+  },
+})
+
+// Object serialization logic
+actionSchema.set('toObject', {
+  virtuals: true,
+  transform: (_doc, ret) => {
+    delete ret._id
+    delete ret.__v
+  },
+})
+
+// custom validation logic for location
+actionSchema.path('location')?.validate(function (location) {
+  if (!location) return true // If location is not provided, it's valid
+  return location.lat && location.lng // If location is provided, both lat and lng must be present
+}, 'If location is provided, both lat and lng are required.')
 
 export const Action = model<IAction>('Action', actionSchema)

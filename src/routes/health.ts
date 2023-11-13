@@ -1,4 +1,5 @@
 import { z } from 'zod'
+
 import { FastifyZodInstance } from '@/types/fastify-zod'
 
 export default async (server: FastifyZodInstance) => {
