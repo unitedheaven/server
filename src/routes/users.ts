@@ -1,37 +1,45 @@
-import { z } from 'zod'
-import { fromZodError } from 'zod-validation-error'
 import fsMultipart from '@fastify/multipart'
+
+import { User } from '@db/models/user.model'
+import {
+  zodUserInput,
+  zodUserParams,
+  zodUserResponse,
+} from '@validations/user.validation'
+import { zod404Error } from '@validations/error.validation'
 
 import { FastifyZodInstance } from '@/types/fastify-zod'
 
 export default async (server: FastifyZodInstance) => {
   server.register(userMultiPartRoutes)
 
-  // TODO: handle errors in a better way
-  server.setErrorHandler(async (error, _request, reply) => {
-    if (error instanceof z.ZodError) {
-      console.log(fromZodError(error).message)
-      return reply.status(400).send(fromZodError(error))
-    }
-
-    console.log(error)
-
-    return reply.status(500).send({ error: 'Internal Server Error' })
-  })
-
+  // ROUTE: to get a specific user
   server.get(
     '/:id',
     {
       schema: {
-        params: z.object({
-          id: z.string(),
-        }),
+        params: zodUserParams,
+        response: {
+          200: zodUserResponse,
+          404: zod404Error,
+        },
       },
     },
-    async (_request, _reply) => {
-      const { id } = _request.params
+    async (request, reply) => {
+      const { id: userIdParams } = request.params
+      const returnedUser = await User.findById(userIdParams)
 
-      return { id }
+      if (!returnedUser)
+        return reply.status(404).send({ error: 'User not found' })
+
+      const { _id, username, createdAt, updatedAt } = returnedUser
+
+      return {
+        userId: _id.toString(),
+        username,
+        createdAt,
+        updatedAt,
+      }
     },
   )
 }
@@ -45,27 +53,24 @@ const userMultiPartRoutes = async (server: FastifyZodInstance) => {
     },
   })
 
+  // ROUTE: to create a new user
   server.post(
     '/',
     {
       schema: {
         consumes: ['multipart/form-data'],
-
-        body: z.object({
-          username: z.string(),
-        }),
-
+        body: zodUserInput,
         response: {
-          200: z.object({
-            username: z.string(),
-          }),
+          200: zodUserResponse,
         },
       },
     },
     async (request, reply) => {
-      const { username } = request.body
+      const returnedUser = await new User(request.body).save()
 
-      return reply.status(200).send({ username })
+      const { _id, username } = returnedUser
+
+      return reply.status(200).send({ userId: _id.toString(), username })
     },
   )
 }

@@ -32,6 +32,7 @@
       "@db/*": ["./db/*"],
       "@types/*": ["./types/*"],
       "@utils/*": ["./utils/*"],
+      "@validations/*": ["./validations/*"],
       "@/*": ["./*"]
     }
   },
