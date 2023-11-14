@@ -12,3 +12,4 @@ node_modules
 template.yml
 .aws-sam
 samconfig.toml
+src/scripts/seed-data

@@ -1,32 +1,32 @@
 import { model, Schema } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 
-import { IUser } from '@db/models/user.model'
-
-export interface ISDG {
+export interface INews {
   _id: string
   id: string
-  number: number
   title: string
-  facts?: string[]
-  followers: IUser[]
+  image: string
+  date: Date
+  link: string
+  SDGs: string[]
 }
 
-export const SDGSchema = new Schema<ISDG>({
+export const NewsSchema = new Schema<INews>({
   _id: { type: String, required: true, default: uuidv4 },
-  number: { type: Number, required: true },
   title: { type: String, required: true },
-  facts: [{ type: String }],
-  followers: [{ type: String, ref: 'User' }],
+  image: { type: String, required: true },
+  date: { type: Date, required: true },
+  link: { type: String, required: true },
+  SDGs: [{ type: String, ref: 'SDG', required: true }],
 })
 
 // Virtual for _id
-SDGSchema.virtual('id').get(function () {
+NewsSchema.virtual('id').get(function () {
   return this._id
 })
 
 // JSON serializatoin logic
-SDGSchema.set('toJSON', {
+NewsSchema.set('toJSON', {
   virtuals: true,
   transform: (_doc, ret) => {
     delete ret._id
@@ -35,7 +35,7 @@ SDGSchema.set('toJSON', {
 })
 
 // Object serialization logic
-SDGSchema.set('toObject', {
+NewsSchema.set('toObject', {
   virtuals: true,
   transform: (_doc, ret) => {
     delete ret._id
@@ -43,4 +43,4 @@ SDGSchema.set('toObject', {
   },
 })
 
-export const SDG = model<ISDG>('SDG', SDGSchema)
+export const News = model<INews>('News', NewsSchema)

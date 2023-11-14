@@ -26,6 +26,7 @@
     "sourceMap": true,
     "typeRoots": ["node_modules/@types", "src/@types"],
     "baseUrl": "./src",
+    "resolveJsonModule": true,
     "paths": {
       "@plugins/*": ["./plugins/*"],
       "@routes/*": ["./routes/*"],
@@ -33,6 +34,7 @@
       "@types/*": ["./types/*"],
       "@utils/*": ["./utils/*"],
       "@validations/*": ["./validations/*"],
+      "@scripts/*": ["./scripts/*"],
       "@/*": ["./*"]
     }
   },

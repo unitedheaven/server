@@ -8,7 +8,13 @@
     "start": "npm run build:ts && node dist/app.js",
     "build:ts": "tsc",
     "lint-src": "eslint --ignore-path .eslintignore --ext .ts src",
-    "postinstall": "tsc"
+    "postinstall": "tsc",
+    "seed:numberToId": "ts-node -r tsconfig-paths/register src/scripts/sdgNumberToId.ts",
+    "seed:charity": "ts-node -r tsconfig-paths/register src/scripts/seedCharities.ts",
+    "seed:SDG": "ts-node -r tsconfig-paths/register src/scripts/seedSDGs.ts",
+    "seed:news": "ts-node -r tsconfig-paths/register src/scripts/seedNews.ts",
+    "seed:events": "ts-node -r tsconfig-paths/register src/scripts/seedEvents.ts",
+    "seed:all": "pnpm seed:SDG && pnpm seed:numberToId && pnpm seed:charity"
   },
   "license": "ISC",
   "devDependencies": {
@@ -18,6 +24,7 @@
     "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
+    "csv-parser": "^3.0.0",
     "eslint": "^8.52.0",
     "eslint-config-prettier": "^9.0.0",
     "husky": "^8.0.0",
