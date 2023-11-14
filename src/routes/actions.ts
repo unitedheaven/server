@@ -6,11 +6,15 @@ import {
   zodActionInput,
   zodActionParams,
   zodActionResponse,
-  zodActionFollowOrParticipateResponse,
+  zodActionDonationInput,
+  zodActionWithdrawalInput,
+  zodActionBooleanResponse,
 } from '@validations/action.validation'
-import { zod404Error } from '@validations/error.validation'
+import { zod4xxError } from '@validations/error.validation'
 
 import { FastifyZodInstance } from '@/types/fastify-zod'
+
+const tempUserId = '3309a77c-4e91-4ed1-85b5-44f9d769cb9f'
 
 export default async (server: FastifyZodInstance) => {
   server.register(userMultiPartRoutes)
@@ -22,26 +26,40 @@ export default async (server: FastifyZodInstance) => {
         params: zodActionParams,
         response: {
           200: zodActionResponse,
-          404: zod404Error,
+          404: zod4xxError,
         },
       },
     },
     async (request, reply) => {
       const { id: actionIdParams } = request.params
+      const userId = tempUserId
+
       const returnedAction = await Action.findById(actionIdParams)
         .populate('creator')
         .populate('participants')
         .populate('followers')
         .populate('donations')
+        .populate('withdrawals')
         .populate('progress')
-        .populate('comments')
 
       if (!returnedAction)
         return reply.status(404).send({ error: 'Action not found' })
 
-      console.log(returnedAction)
+      // console.log(returnedAction)
 
-      return returnedAction
+      const leanResult = returnedAction.toObject()
+
+      return {
+        ...leanResult,
+        donations: [],
+        currentContractValue: returnedAction.currentContractValue(),
+        totalDonationAmount: returnedAction.totalDonationAmount(),
+        totalParticipantCount: returnedAction.totalParticipantCount(),
+        totalFollowerCount: returnedAction.totalFollowerCount(),
+        isFollowing: returnedAction.isFollowedByUser(userId),
+        isParticipating: returnedAction.isParticipatedByUser(userId),
+        isDonated: returnedAction.isDonatedByUser(userId),
+      }
     },
   )
 
@@ -51,19 +69,20 @@ export default async (server: FastifyZodInstance) => {
       schema: {
         params: zodActionParams,
         response: {
-          200: zodActionFollowOrParticipateResponse,
-          400: zod404Error,
-          404: zod404Error,
+          200: zodActionBooleanResponse,
+          400: zod4xxError,
+          404: zod4xxError,
         },
       },
     },
 
     async (request, reply) => {
       const { id: actionIdParams } = request.params
-      const userId = 'd4300e5b-8acc-481f-8a48-c6aa1e6f7604'
+      const userId = tempUserId
 
-      const actionToBeFollowed =
-        await Action.findById(actionIdParams).populate('followers')
+      const actionToBeFollowed = await Action.findById(actionIdParams)
+        .populate('creator')
+        .populate('followers')
 
       if (!actionToBeFollowed)
         return reply.status(404).send({ error: 'Action not found' })
@@ -73,10 +92,7 @@ export default async (server: FastifyZodInstance) => {
           .status(400)
           .send({ error: "Creator can't follow his own action" })
 
-      const isAlreadyFollowing = actionToBeFollowed.followers.some(follower => {
-        return follower.id == userId
-      })
-      if (isAlreadyFollowing)
+      if (actionToBeFollowed.isFollowedByUser(userId))
         return reply.status(400).send({ error: 'Already following' })
 
       actionToBeFollowed.followers.push(userId as unknown as IUser)
@@ -96,34 +112,189 @@ export default async (server: FastifyZodInstance) => {
       schema: {
         params: zodActionParams,
         response: {
-          200: zodActionFollowOrParticipateResponse,
-          400: zod404Error,
-          404: zod404Error,
+          200: zodActionBooleanResponse,
+          400: zod4xxError,
+          404: zod4xxError,
         },
       },
     },
     async (request, reply) => {
       const { id: actionIdParams } = request.params
-      const userId = 'd4300e5b-8acc-481f-8a48-c6aa1e6f7604'
+      const userId = tempUserId
 
-      const actionToBeParticipated =
-        await Action.findById(actionIdParams).populate('participants')
+      const actionToBeParticipated = await Action.findById(actionIdParams)
+        .populate('creator')
+        .populate('participants')
 
       console.log(actionToBeParticipated)
 
       if (!actionToBeParticipated)
         return reply.status(404).send({ error: 'Action not found' })
 
-      const isAlreadyParticipated = actionToBeParticipated.participants.some(
-        participant => {
-          return participant.id == userId
-        },
-      )
-      if (isAlreadyParticipated)
+      if (!actionToBeParticipated.isParticipatory)
+        return reply.status(400).send({
+          error: 'Action is not participatory',
+        })
+
+      if (actionToBeParticipated.creator.id == userId)
+        return reply
+          .status(400)
+          .send({ error: "Creator can't participate in his own action" })
+
+      if (actionToBeParticipated.isParticipatedByUser(userId))
         return reply.status(400).send({ error: 'Already participated' })
 
       actionToBeParticipated.participants.push(userId as unknown as IUser)
       await actionToBeParticipated.save()
+
+      return {
+        success: true,
+      }
+    },
+  )
+
+  server.post(
+    '/:id/donate',
+    {
+      schema: {
+        params: zodActionParams,
+        body: zodActionDonationInput,
+        response: {
+          200: zodActionBooleanResponse,
+          400: zod4xxError,
+          404: zod4xxError,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id: actionIdParams } = request.params
+      const userId = tempUserId
+
+      const { amount: donationAmountInput } = request.body
+
+      const actionToBeDonated = await Action.findById(actionIdParams)
+        .populate('donations')
+        .populate('withdrawals')
+
+      if (!actionToBeDonated)
+        return reply.status(404).send({ error: 'Action not found' })
+
+      if (!actionToBeDonated.isDonatable)
+        return reply.status(400).send({
+          error: 'Action is not donatable',
+        })
+
+      if (
+        actionToBeDonated.currentContractValue() + donationAmountInput >
+        actionToBeDonated.maxDonationAmount
+      )
+        return reply
+          .status(400)
+          .send({ error: 'Donation amount exceeds max donation amount' })
+
+      actionToBeDonated.donations.push({
+        amount: donationAmountInput,
+        donator: userId as unknown as IUser,
+      })
+      await actionToBeDonated.save()
+
+      return {
+        success: true,
+      }
+    },
+  )
+
+  server.post(
+    '/:id/withdraw',
+    {
+      schema: {
+        params: zodActionParams,
+        body: zodActionWithdrawalInput,
+        response: {
+          200: zodActionBooleanResponse,
+          400: zod4xxError,
+          404: zod4xxError,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id: actionIdParams } = request.params
+      // const userId = tempUserId
+
+      const { amount: withdrawalAmountInput, message: withdrawalMessageInput } =
+        request.body
+
+      const actionToBeWithdrawn = await Action.findById(actionIdParams)
+        .populate('creator')
+        .populate('donations')
+        .populate('withdrawals')
+
+      if (!actionToBeWithdrawn)
+        return reply.status(404).send({ error: 'Action not found' })
+
+      if (actionToBeWithdrawn.creator.id != tempUserId)
+        return reply
+          .status(400)
+          .send({ error: 'Only creator can withdraw from this action' })
+
+      console.log(actionToBeWithdrawn.currentContractValue())
+
+      if (withdrawalAmountInput >= actionToBeWithdrawn.currentContractValue())
+        return reply.status(400).send({
+          error: 'Withdrawal amount exceeds donation amount',
+        })
+
+      actionToBeWithdrawn.withdrawals.push({
+        amount: withdrawalAmountInput,
+        message: withdrawalMessageInput,
+      })
+      await actionToBeWithdrawn.save()
+
+      console.log(actionToBeWithdrawn)
+
+      return {
+        success: true,
+      }
+    },
+  )
+
+  server.post(
+    '/:id/progress',
+    {
+      schema: {
+        params: zodActionParams,
+        body: zodActionWithdrawalInput,
+        response: {
+          200: zodActionBooleanResponse,
+          400: zod4xxError,
+          404: zod4xxError,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id: actionIdParams } = request.params
+      const userId = tempUserId
+
+      const { message: progressMessageInput } = request.body
+
+      const actionToBeProgressed = await Action.findById(actionIdParams)
+        .populate('creator')
+        .populate('progress')
+
+      if (!actionToBeProgressed)
+        return reply.status(404).send({ error: 'Action not found' })
+
+      if (actionToBeProgressed.creator.id != userId)
+        return reply
+          .status(400)
+          .send({ error: 'Only creator can update on progress to this action' })
+
+      actionToBeProgressed.progress.push({
+        message: progressMessageInput,
+      })
+      await actionToBeProgressed.save()
+
+      console.log(actionToBeProgressed)
 
       return {
         success: true,
@@ -151,16 +322,27 @@ const userMultiPartRoutes = async (server: FastifyZodInstance) => {
       },
     },
     async (request, _reply) => {
-      const creator = 'daabba20-b705-41c9-9f3e-42659b8b140d'
+      const userId = tempUserId
 
       const postedAction = await new Action({
         ...request.body,
-        creator,
+        creator: userId,
       }).save()
 
-      await postedAction.populate('creator')
+      const postedAction2 = await postedAction.populate('creator')
 
-      return postedAction
+      const leanResult = postedAction2.toObject()
+
+      return {
+        ...leanResult,
+        currentContractValue: postedAction2.currentContractValue(),
+        totalDonationAmount: postedAction2.totalDonationAmount(),
+        totalParticipantCount: postedAction2.totalParticipantCount(),
+        totalFollowerCount: postedAction2.totalFollowerCount(),
+        isFollowing: postedAction2.isFollowedByUser(userId),
+        isParticipating: postedAction2.isParticipatedByUser(userId),
+        isDonated: postedAction2.isDonatedByUser(userId),
+      }
     },
   )
 }
