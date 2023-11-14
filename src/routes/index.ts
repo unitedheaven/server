@@ -4,6 +4,7 @@ import errorHandler from '@plugins/error-handler'
 import health from '@routes/health'
 import users from '@routes/users'
 import actions from '@routes/actions'
+import sdgs from '@routes/sdgs'
 
 import { FastifyZodInstance } from '@/types/fastify-zod'
 
@@ -14,4 +15,5 @@ export default async (server: FastifyZodInstance) => {
   server.register(users, { prefix: '/users' })
   server.register(actions, { prefix: '/actions' })
   server.register(health, { prefix: '/health' })
+  server.register(sdgs, { prefix: '/sdgs' })
 }

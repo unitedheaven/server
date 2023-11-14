@@ -8,13 +8,13 @@
     "start": "npm run build:ts && node dist/app.js",
     "build:ts": "tsc",
     "lint-src": "eslint --ignore-path .eslintignore --ext .ts src",
-    "postinstall": "tsc",
+    "seed:SDG": "ts-node -r tsconfig-paths/register src/scripts/seedSDGs.ts",
     "seed:numberToId": "ts-node -r tsconfig-paths/register src/scripts/sdgNumberToId.ts",
     "seed:charity": "ts-node -r tsconfig-paths/register src/scripts/seedCharities.ts",
-    "seed:SDG": "ts-node -r tsconfig-paths/register src/scripts/seedSDGs.ts",
     "seed:news": "ts-node -r tsconfig-paths/register src/scripts/seedNews.ts",
     "seed:events": "ts-node -r tsconfig-paths/register src/scripts/seedEvents.ts",
-    "seed:all": "pnpm seed:SDG && pnpm seed:numberToId && pnpm seed:charity"
+    "seed:all": "pnpm seed:SDG && pnpm seed:numberToId && pnpm seed:charity",
+    "aws:build": "pnpm build:ts && sam build && sam deploy --guided"
   },
   "license": "ISC",
   "devDependencies": {
