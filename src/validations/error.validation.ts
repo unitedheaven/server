@@ -1,5 +1,5 @@
 import { z } from 'zod'
 
-export const zod404Error = z.object({
+export const zod4xxError = z.object({
   error: z.string(),
 })

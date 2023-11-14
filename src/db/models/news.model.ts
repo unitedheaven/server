@@ -6,7 +6,7 @@ export interface INews {
   id: string
   title: string
   image: string
-  date: Date
+  date: string
   link: string
   SDGs: string[]
 }
@@ -15,7 +15,7 @@ export const NewsSchema = new Schema<INews>({
   _id: { type: String, required: true, default: uuidv4 },
   title: { type: String, required: true },
   image: { type: String, required: true },
-  date: { type: Date, required: true },
+  date: { type: String, required: true },
   link: { type: String, required: true },
   SDGs: [{ type: String, ref: 'SDG', required: true }],
 })

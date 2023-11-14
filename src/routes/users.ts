@@ -6,7 +6,7 @@ import {
   zodUserParams,
   zodUserResponse,
 } from '@validations/user.validation'
-import { zod404Error } from '@validations/error.validation'
+import { zod4xxError } from '@validations/error.validation'
 
 import { FastifyZodInstance } from '@/types/fastify-zod'
 
@@ -20,7 +20,7 @@ export default async (server: FastifyZodInstance) => {
         params: zodUserParams,
         response: {
           200: zodUserResponse,
-          404: zod404Error,
+          404: zod4xxError,
         },
       },
     },
