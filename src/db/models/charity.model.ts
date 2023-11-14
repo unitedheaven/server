@@ -1,7 +1,7 @@
 import { model, Schema } from 'mongoose'
 import { v4 as uuidv4 } from 'uuid'
 
-import { ISDG } from '@db/models/sdg.model'
+// import { ISDG } from '@db/models/sdg.model'
 import { IUser } from 'db/models/user.model'
 
 export interface ICharity {
@@ -11,7 +11,7 @@ export interface ICharity {
   rating: number
   score: number
   link: string
-  SDGs: ISDG[]
+  SDGs: string[]
   followers?: IUser[]
 }
 

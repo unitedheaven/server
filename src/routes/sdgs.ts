@@ -1,10 +1,15 @@
 import { SDG } from '@db/models/sdg.model'
+import { Action } from '@db/models/action.model'
+import { Charity } from '@db/models/charity.model'
+import { News } from '@db/models/news.model'
+import { Event } from '@db/models/event.model'
 import { IUser } from '@db/models/user.model'
 import {
   zodSDGParams,
   zodSDGResponse,
   zodSDGBooleanResponse,
   zodManySDGResponse,
+  zodSDGRelatedTopicsResponse,
 } from '@validations/sdg.validation'
 import { zod4xxError } from '@validations/error.validation'
 
@@ -124,17 +129,41 @@ export default async (server: FastifyZodInstance) => {
       schema: {
         params: zodSDGParams,
         response: {
-          200: zodSDGResponse,
+          200: zodSDGRelatedTopicsResponse,
           404: zod4xxError,
         },
       },
     },
     async (request, _reply) => {
       const { id: sdgIdParams } = request.params
+      const limit = 5
 
-      console.log(sdgIdParams)
+      const newsPromise = News.find({ SDGs: sdgIdParams }, undefined, {
+        limit,
+      })
+      const eventsPromise = Event.find({ SDGs: sdgIdParams }, undefined, {
+        limit,
+      })
+      const actionsPromise = Action.find({ SDGs: sdgIdParams }, undefined, {
+        limit,
+      })
+      const charitiesPromise = Charity.find({ SDGs: sdgIdParams }, undefined, {
+        limit,
+      })
 
-      // get actions, news, events, charities related to this SDG
+      const [news, events, actions, charities] = await Promise.all([
+        newsPromise,
+        eventsPromise,
+        actionsPromise,
+        charitiesPromise,
+      ])
+
+      return {
+        news,
+        events,
+        actions,
+        charities,
+      }
     },
   )
 }
