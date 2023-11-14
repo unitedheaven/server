@@ -1,7 +1,6 @@
 import 'dotenv/config'
 import csv from 'csv-parser'
 import fs from 'fs'
-import getSDGNumberToId from '@scripts/seed-data/sdgsNumberToIdMap.json'
 import { connectToDB } from '@db/index'
 import { Charity as CharityModel } from '@db/models/charity.model'
 
@@ -14,16 +13,14 @@ interface Charity {
 }
 
 interface LineData {
-  SDG: string
+  sdg: string
   name: string
   rating: string
   link: string
   score: string
 }
 
-export const seedCharities = async (
-  numberToIdMap: Map<string, string>,
-): Promise<void> => {
+export const seedCharities = async (): Promise<void> => {
   const charities: Charity[] = []
 
   fs.createReadStream('./src/scripts/seed-data/charity.csv')
@@ -34,15 +31,13 @@ export const seedCharities = async (
       for (const charity of charities) {
         if (charity.name == lineData.name) {
           charityAlreadyExists = true
-          const sdgIdInNumber = parseInt(lineData.SDG) + 1
-          const sdgId = numberToIdMap.get(sdgIdInNumber.toString())
-          if (sdgId) charity.SDGs.push(sdgId)
+          const sdgIdInNumber = parseInt(lineData.sdg) + 1
+          charity.SDGs.push(sdgIdInNumber.toString())
         }
       }
       if (!charityAlreadyExists) {
-        const sdgIdInNumber = parseInt(lineData.SDG) + 1
-        const sdgId = numberToIdMap.get(sdgIdInNumber.toString())
-        const sdgs = sdgId ? [sdgId] : []
+        const sdgIdInNumber = parseInt(lineData.sdg) + 1
+        const sdgs = [sdgIdInNumber.toString()]
         const { name, rating, link, score } = lineData
         charities.push({
           SDGs: sdgs,
@@ -66,13 +61,7 @@ export const seedCharities = async (
 }
 
 const main = async () => {
-  const numberToIdMap = new Map<string, string>()
-  for (const [key, value] of Object.entries(getSDGNumberToId)) {
-    numberToIdMap.set(key, value)
-  }
-
-  console.log(numberToIdMap)
-  await seedCharities(numberToIdMap)
+  await seedCharities()
 }
 
 main()
