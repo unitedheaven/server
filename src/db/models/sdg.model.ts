@@ -1,5 +1,4 @@
 import { model, Schema } from 'mongoose'
-import { v4 as uuidv4 } from 'uuid'
 
 import { IUser } from '@db/models/user.model'
 
@@ -10,15 +9,28 @@ export interface ISDG {
   title: string
   facts?: string[]
   followers: IUser[]
+  isFollowedByUser(userId: string): boolean
 }
 
-export const SDGSchema = new Schema<ISDG>({
-  _id: { type: String, required: true, default: uuidv4 },
-  number: { type: Number, required: true },
-  title: { type: String, required: true },
-  facts: [{ type: String }],
-  followers: [{ type: String, ref: 'User' }],
-})
+export const SDGSchema = new Schema<ISDG>(
+  {
+    _id: { type: String, required: true },
+    number: { type: Number, required: true },
+    title: { type: String, required: true },
+    facts: [{ type: String }],
+    followers: [{ type: String, ref: 'User' }],
+  },
+  {
+    methods: {
+      isFollowedByUser(userId: string): boolean {
+        if (!userId) return false
+        return this.followers.some(follower => {
+          return follower.id == userId
+        })
+      },
+    },
+  },
+)
 
 // Virtual for _id
 SDGSchema.virtual('id').get(function () {
