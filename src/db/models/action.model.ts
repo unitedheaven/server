@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { IUser } from '@db/models/user.model'
 
-interface IAction {
+export interface IAction {
   _id: string
   id: string
   title: string

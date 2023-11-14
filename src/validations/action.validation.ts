@@ -102,3 +102,5 @@ export const zodActionResponse = z.object({
   isParticipating: z.boolean(),
   isDonated: z.boolean(),
 })
+
+export type ActionResponseType = z.infer<typeof zodActionResponse>

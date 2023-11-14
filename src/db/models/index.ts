@@ -1,3 +1,6 @@
 export * from '@db/models/user.model'
 export * from '@db/models/action.model'
 export * from '@db/models/sdg.model'
+export * from '@db/models/charity.model'
+export * from '@db/models/news.model'
+export * from '@db/models/event.model'
