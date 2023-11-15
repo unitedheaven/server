@@ -234,8 +234,8 @@ export default async (server: FastifyZodInstance) => {
 
       if (actionToBeWithdrawn.creator.id != tempUserId)
         return reply
-          .status(400)
-          .send({ error: 'Only creator can withdraw from this action' })
+          .status(403)
+          .send({ error: 'Not authorized to withdraw from the contact' })
 
       console.log(actionToBeWithdrawn.currentContractValue())
 
@@ -286,8 +286,8 @@ export default async (server: FastifyZodInstance) => {
 
       if (actionToBeProgressed.creator.id != userId)
         return reply
-          .status(400)
-          .send({ error: 'Only creator can update on progress to this action' })
+          .status(403)
+          .send({ error: 'Not authorized to update progress to the action' })
 
       actionToBeProgressed.progress.push({
         message: progressMessageInput,

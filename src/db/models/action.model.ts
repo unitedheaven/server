@@ -17,6 +17,7 @@ export interface IAction {
   isParticipatory: boolean
   isDonatable: boolean
   maxDonationAmount: number
+  contractId: string
   creator: IUser
   participants: IUser[]
   followers: IUser[]
@@ -63,6 +64,7 @@ const actionSchema = new Schema<IAction>(
     isParticipatory: { type: Boolean, required: true },
     isDonatable: { type: Boolean, required: true },
     maxDonationAmount: { type: Number, required: true },
+    contractId: { type: String, required: true },
     creator: {
       type: String,
       ref: 'User',
