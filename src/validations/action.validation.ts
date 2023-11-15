@@ -8,12 +8,7 @@ export const zodActionInput = z.object({
   title: z.string(),
   description: z.string(),
   image: z.string().optional(),
-  location: z
-    .object({
-      lat: z.string(),
-      lng: z.string(),
-    })
-    .optional(),
+  location: z.string().optional(),
   onelineUrl: z.string().optional(),
   SDGs: z.array(z.string()).min(1),
   startDate: z.string().optional(),
@@ -41,12 +36,7 @@ export const zodActionResponse = z.object({
   title: z.string(),
   description: z.string(),
   image: z.string().optional(),
-  location: z
-    .object({
-      lat: z.string(),
-      lng: z.string(),
-    })
-    .optional(),
+  location: z.string().optional(),
   onlineUrl: z.string().optional(),
   startDate: z.date().optional(),
   endDate: z.date(),

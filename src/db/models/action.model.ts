@@ -9,10 +9,7 @@ export interface IAction {
   title: string
   description: string
   image?: string
-  location?: {
-    lat: string
-    lng: string
-  }
+  location?: string
   onlineUrl?: string
   SDGs: string[]
   startDate?: Date
@@ -58,10 +55,7 @@ const actionSchema = new Schema<IAction>(
     title: { type: String, required: true },
     description: { type: String, required: true },
     image: { type: String },
-    location: {
-      lat: { type: String },
-      lng: { type: String },
-    },
+    location: { type: String },
     onlineUrl: { type: String },
     SDGs: [{ type: String, ref: 'SDG', required: true }],
     startDate: { type: Date },
@@ -180,9 +174,9 @@ actionSchema.set('toObject', {
 })
 
 // custom validation logic for location
-actionSchema.path('location')?.validate(function (location) {
-  if (!location) return true // If location is not provided, it's valid
-  return location.lat && location.lng // If location is provided, both lat and lng must be present
-}, 'If location is provided, both lat and lng are required.')
+// actionSchema.path('location')?.validate(function (location) {
+//   if (!location) return true // If location is not provided, it's valid
+//   return location.lat && location.lng // If location is provided, both lat and lng must be present
+// }, 'If location is provided, both lat and lng are required.')
 
 export const Action = model<IAction>('Action', actionSchema)
