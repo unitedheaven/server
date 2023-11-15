@@ -15,7 +15,7 @@ import { zod4xxError } from '@validations/error.validation'
 
 import { FastifyZodInstance } from '@/types/fastify-zod'
 
-const tempUserId = 'aefeef22-5dfd-43d0-aac2-67135a07e482'
+const tempUserId = '682fc9a2-dfda-4ace-95ee-5bbaced67518'
 
 export default async (server: FastifyZodInstance) => {
   server.get(
@@ -114,6 +114,45 @@ export default async (server: FastifyZodInstance) => {
 
       sdgToBeFollowed.followers.push(userId as unknown as IUser)
       const followedAction = await sdgToBeFollowed.save()
+
+      console.log(followedAction)
+
+      return {
+        success: true,
+      }
+    },
+  )
+
+  server.post(
+    '/:id/unfollow',
+    {
+      schema: {
+        params: zodSDGParams,
+        response: {
+          200: zodSDGBooleanResponse,
+          400: zod4xxError,
+          404: zod4xxError,
+        },
+      },
+    },
+
+    async (request, reply) => {
+      const { id: sdgIdParams } = request.params
+      const userId = tempUserId
+
+      const sdgToBeUnfollowed =
+        await SDG.findById(sdgIdParams).populate('followers')
+
+      if (!sdgToBeUnfollowed)
+        return reply.status(404).send({ error: 'SDG not found' })
+
+      if (!sdgToBeUnfollowed.isFollowedByUser(userId))
+        return reply.status(400).send({ error: 'Already not following' })
+
+      sdgToBeUnfollowed.followers = sdgToBeUnfollowed.followers.filter(
+        follower => follower.id !== userId,
+      )
+      const followedAction = await sdgToBeUnfollowed.save()
 
       console.log(followedAction)
 

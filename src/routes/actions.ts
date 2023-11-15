@@ -12,7 +12,7 @@ import { zod4xxError } from '@validations/error.validation'
 
 import { FastifyZodInstance } from '@/types/fastify-zod'
 
-const tempUserId = 'aefeef22-5dfd-43d0-aac2-67135a07e482'
+const tempUserId = '682fc9a2-dfda-4ace-95ee-5bbaced67518'
 
 export default async (server: FastifyZodInstance) => {
   server.get(
@@ -136,6 +136,46 @@ export default async (server: FastifyZodInstance) => {
   )
 
   server.post(
+    '/:id/unfollow',
+    {
+      schema: {
+        params: zodActionParams,
+        response: {
+          200: zodActionBooleanResponse,
+          400: zod4xxError,
+          404: zod4xxError,
+        },
+      },
+    },
+
+    async (request, reply) => {
+      const { id: actionIdParams } = request.params
+      const userId = tempUserId
+
+      const actionToBeUnfollowed = await Action.findById(actionIdParams)
+        .populate('creator')
+        .populate('followers')
+
+      if (!actionToBeUnfollowed)
+        return reply.status(404).send({ error: 'Action not found' })
+
+      if (!actionToBeUnfollowed.isFollowedByUser(userId))
+        return reply.status(400).send({ error: 'Already not following' })
+
+      // remove a specific user from actionToBeUnfollowed.followers array by userId
+      actionToBeUnfollowed.followers = actionToBeUnfollowed.followers.filter(
+        follower => follower.id != userId,
+      )
+
+      await actionToBeUnfollowed.save()
+
+      return {
+        success: true,
+      }
+    },
+  )
+
+  server.post(
     '/:id/participate',
     {
       schema: {
@@ -175,6 +215,47 @@ export default async (server: FastifyZodInstance) => {
 
       actionToBeParticipated.participants.push(userId as unknown as IUser)
       await actionToBeParticipated.save()
+
+      return {
+        success: true,
+      }
+    },
+  )
+
+  server.post(
+    '/:id/unparticipate',
+    {
+      schema: {
+        params: zodActionParams,
+        response: {
+          200: zodActionBooleanResponse,
+          400: zod4xxError,
+          404: zod4xxError,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { id: actionIdParams } = request.params
+      const userId = tempUserId
+
+      const actionToBeUnparticipated = await Action.findById(actionIdParams)
+        .populate('creator')
+        .populate('participants')
+
+      console.log(actionToBeUnparticipated)
+
+      if (!actionToBeUnparticipated)
+        return reply.status(404).send({ error: 'Action not found' })
+
+      if (!actionToBeUnparticipated.isParticipatedByUser(userId))
+        return reply.status(400).send({ error: 'Not already participated' })
+
+      // remove a specific user from actionToBeUnparticipated.participants array by userId
+      actionToBeUnparticipated.participants =
+        actionToBeUnparticipated.participants.filter(
+          participant => participant.id != userId,
+        )
+      await actionToBeUnparticipated.save()
 
       return {
         success: true,
