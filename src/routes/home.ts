@@ -68,6 +68,7 @@ export default async (server: FastifyZodInstance) => {
           isFollowing: action.isFollowedByUser(tempUserId),
           isParticipating: action.isParticipatedByUser(tempUserId),
           isDonated: action.isDonatedByUser(tempUserId),
+          isCreator: action.isCreatedByUser(tempUserId),
         })
       })
 

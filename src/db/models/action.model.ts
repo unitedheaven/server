@@ -44,6 +44,7 @@ export interface IAction {
   isFollowedByUser(userId: string): boolean
   isParticipatedByUser(userId: string): boolean
   isDonatedByUser(userId: string): boolean
+  isCreatedByUser(userId: string): boolean
 }
 
 const actionSchema = new Schema<IAction>(
@@ -147,6 +148,11 @@ const actionSchema = new Schema<IAction>(
         return this.donations.some(donation => {
           return donation.donator.id == userId
         })
+      },
+
+      isCreatedByUser(userId: string): boolean {
+        if (!userId) return false
+        return this.creator.id == userId
       },
     },
   },
