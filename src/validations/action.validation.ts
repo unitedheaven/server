@@ -16,6 +16,7 @@ export const zodActionInput = z.object({
   isParticipatory: z.boolean(),
   isDonatable: z.boolean(),
   maxDonationAmount: z.number(),
+  contractId: z.string(),
 })
 
 export const zodActionDonationInput = z.object({
