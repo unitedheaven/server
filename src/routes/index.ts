@@ -1,3 +1,5 @@
+import cors from '@fastify/cors'
+
 import zod from '@plugins/zod'
 import errorHandler from '@plugins/error-handler'
 
@@ -12,6 +14,13 @@ import { FastifyZodInstance } from '@/types/fastify-zod'
 export default async (server: FastifyZodInstance) => {
   server.register(zod)
   server.register(errorHandler)
+  server.register(cors, {
+    origin: [
+      'localhost:*',
+      'https://web-united-heaven.vercel.app/*',
+      'https://united-heaven.org/',
+    ],
+  })
 
   server.register(users, { prefix: '/users' })
   server.register(actions, { prefix: '/actions' })
