@@ -44,6 +44,7 @@ export const zodActionResponse = z.object({
   SDGs: z.array(z.string()).min(1),
   isParticipatory: z.boolean(),
   isDonatable: z.boolean(),
+  maxDonationAmount: z.number(),
   contractId: z.string(),
   creator: z.object({
     id: z.string(),
