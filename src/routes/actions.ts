@@ -1,5 +1,3 @@
-import fsMultipart from '@fastify/multipart'
-
 import { Action } from '@db/models/action.model'
 import { IUser } from '@db/models/user.model'
 import {
@@ -17,8 +15,6 @@ import { FastifyZodInstance } from '@/types/fastify-zod'
 const tempUserId = '3309a77c-4e91-4ed1-85b5-44f9d769cb9f'
 
 export default async (server: FastifyZodInstance) => {
-  server.register(userMultiPartRoutes)
-
   server.get(
     '/:id',
     {
@@ -59,6 +55,39 @@ export default async (server: FastifyZodInstance) => {
         isFollowing: returnedAction.isFollowedByUser(userId),
         isParticipating: returnedAction.isParticipatedByUser(userId),
         isDonated: returnedAction.isDonatedByUser(userId),
+      }
+    },
+  )
+
+  server.post(
+    '/',
+    {
+      schema: {
+        body: zodActionInput,
+        response: { 200: zodActionResponse },
+      },
+    },
+    async (request, _reply) => {
+      const userId = tempUserId
+
+      const postedAction = await new Action({
+        ...request.body,
+        creator: userId,
+      }).save()
+
+      const postedAction2 = await postedAction.populate('creator')
+
+      const leanResult = postedAction2.toObject()
+
+      return {
+        ...leanResult,
+        currentContractValue: postedAction2.currentContractValue(),
+        totalDonationAmount: postedAction2.totalDonationAmount(),
+        totalParticipantCount: postedAction2.totalParticipantCount(),
+        totalFollowerCount: postedAction2.totalFollowerCount(),
+        isFollowing: postedAction2.isFollowedByUser(userId),
+        isParticipating: postedAction2.isParticipatedByUser(userId),
+        isDonated: postedAction2.isDonatedByUser(userId),
       }
     },
   )
@@ -298,50 +327,6 @@ export default async (server: FastifyZodInstance) => {
 
       return {
         success: true,
-      }
-    },
-  )
-}
-
-// TODO: move this to a separate file
-const userMultiPartRoutes = async (server: FastifyZodInstance) => {
-  server.register(fsMultipart, {
-    attachFieldsToBody: 'keyValues',
-    isPartAFile: (_fieldName, contentType, _fileName) => {
-      return contentType != undefined && contentType.includes('image')
-    },
-  })
-
-  server.post(
-    '/',
-    {
-      schema: {
-        consumes: ['multipart/form-data'],
-        body: zodActionInput,
-        response: { 200: zodActionResponse },
-      },
-    },
-    async (request, _reply) => {
-      const userId = tempUserId
-
-      const postedAction = await new Action({
-        ...request.body,
-        creator: userId,
-      }).save()
-
-      const postedAction2 = await postedAction.populate('creator')
-
-      const leanResult = postedAction2.toObject()
-
-      return {
-        ...leanResult,
-        currentContractValue: postedAction2.currentContractValue(),
-        totalDonationAmount: postedAction2.totalDonationAmount(),
-        totalParticipantCount: postedAction2.totalParticipantCount(),
-        totalFollowerCount: postedAction2.totalFollowerCount(),
-        isFollowing: postedAction2.isFollowedByUser(userId),
-        isParticipating: postedAction2.isParticipatedByUser(userId),
-        isDonated: postedAction2.isDonatedByUser(userId),
       }
     },
   )

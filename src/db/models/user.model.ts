@@ -5,6 +5,7 @@ export interface IUser {
   _id: string
   id: string
   username: string
+  profilePicture?: string
   createdAt?: Date
   updatedAt?: Date
 }
@@ -17,6 +18,7 @@ export const userSchema = new Schema<IUser>(
       default: uuidv4,
     },
     username: { type: String, required: true },
+    profilePicture: { type: String },
   },
   { timestamps: true },
 )

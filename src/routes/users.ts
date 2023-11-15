@@ -1,5 +1,3 @@
-import fsMultipart from '@fastify/multipart'
-
 import { User } from '@db/models/user.model'
 import {
   zodUserInput,
@@ -11,8 +9,6 @@ import { zod4xxError } from '@validations/error.validation'
 import { FastifyZodInstance } from '@/types/fastify-zod'
 
 export default async (server: FastifyZodInstance) => {
-  server.register(userMultiPartRoutes)
-
   server.get(
     '/:id',
     {
@@ -34,22 +30,11 @@ export default async (server: FastifyZodInstance) => {
       return returnedUser
     },
   )
-}
-
-// TODO: move this to a separate file
-const userMultiPartRoutes = async (server: FastifyZodInstance) => {
-  server.register(fsMultipart, {
-    attachFieldsToBody: 'keyValues',
-    isPartAFile: (_fieldName, contentType, _fileName) => {
-      return contentType != undefined && contentType.includes('image')
-    },
-  })
 
   server.post(
     '/',
     {
       schema: {
-        consumes: ['multipart/form-data'],
         body: zodUserInput,
         response: {
           200: zodUserResponse,
