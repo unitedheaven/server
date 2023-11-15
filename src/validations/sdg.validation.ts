@@ -1,5 +1,4 @@
 import { z } from 'zod'
-import { zodActionResponse } from './action.validation'
 
 export const zodSDGResponse = z.object({
   id: z.string(),
@@ -53,14 +52,21 @@ export const zodSDGRelatedTopicsResponse = z.object({
     }),
   ),
   actions: z.array(
-    zodActionResponse.omit({
-      currentContractValue: true,
-      totalDonationAmount: true,
-      totalParticipantCount: true,
-      totalFollowerCount: true,
-      isFollowing: true,
-      isParticipating: true,
-      isDonated: true,
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      description: z.string(),
+      image: z.string().optional(),
+      location: z.string().optional(),
+      onlineUrl: z.string().optional(),
+      startDate: z.date().optional(),
+      endDate: z.date(),
+      SDGs: z.array(z.string()).min(1),
+      isParticipatory: z.boolean(),
+      isDonatable: z.boolean(),
+      contractId: z.string(),
+      createdAt: z.date(),
+      updatedAt: z.date(),
     }),
   ),
 })

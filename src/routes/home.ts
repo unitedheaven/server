@@ -10,7 +10,7 @@ import { ActionResponseType } from '@validations/action.validation'
 
 import { FastifyZodInstance } from '@/types/fastify-zod'
 
-const tempUserId = '3309a77c-4e91-4ed1-85b5-44f9d769cb9f'
+const tempUserId = 'aefeef22-5dfd-43d0-aac2-67135a07e482'
 
 export default async (server: FastifyZodInstance) => {
   server.get(

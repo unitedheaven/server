@@ -16,9 +16,9 @@ export default async (server: FastifyZodInstance) => {
   server.register(errorHandler)
   server.register(cors, {
     origin: [
-      'localhost:*',
-      'https://web-united-heaven.vercel.app/*',
-      'https://united-heaven.org/',
+      'http://localhost:3000',
+      'https://web-united-heaven.vercel.app',
+      'https://united-heaven.org',
     ],
   })
 
