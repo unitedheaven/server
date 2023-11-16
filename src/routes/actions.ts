@@ -7,6 +7,7 @@ import {
   zodActionDonationInput,
   zodActionWithdrawalInput,
   zodActionBooleanResponse,
+  zodActionProgressInput,
 } from '@validations/action.validation'
 import { zod4xxError } from '@validations/error.validation'
 
@@ -375,7 +376,7 @@ export default async (server: FastifyZodInstance) => {
     {
       schema: {
         params: zodActionParams,
-        body: zodActionWithdrawalInput,
+        body: zodActionProgressInput,
         response: {
           200: zodActionBooleanResponse,
           400: zod4xxError,

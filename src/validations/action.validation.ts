@@ -97,4 +97,8 @@ export const zodActionResponse = z.object({
   isCreator: z.boolean(),
 })
 
+export const zodActionProgressInput = z.object({
+  message: z.string(),
+})
+
 export type ActionResponseType = z.infer<typeof zodActionResponse>
